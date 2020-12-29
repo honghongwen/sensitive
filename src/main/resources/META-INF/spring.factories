@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.tanzhou.sensitive.config.ValidatorAutoConfiguration
