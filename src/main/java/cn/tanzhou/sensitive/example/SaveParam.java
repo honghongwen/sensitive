@@ -1,5 +1,7 @@
 package cn.tanzhou.sensitive.example;
 
+import cn.tanzhou.sensitive.annotation.Sensitive;
+
 import java.math.BigDecimal;
 
 /**
@@ -11,6 +13,7 @@ public class SaveParam {
 
     private Integer id;
 
+    @Sensitive(message = "不能写%s哦")
     private String name;
 
     private String title;

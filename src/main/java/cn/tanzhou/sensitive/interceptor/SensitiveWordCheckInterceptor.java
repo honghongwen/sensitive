@@ -1,6 +1,7 @@
-package cn.tanzhou.sensitive.config;
+package cn.tanzhou.sensitive.interceptor;
 
-import cn.tanzhou.sensitive.valid.SensitiveValidator;
+import cn.tanzhou.sensitive.annotation.Sensitive;
+import cn.tanzhou.sensitive.validtor.SensitiveWordValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,17 +17,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.Objects;
-
 
 /**
  * @author fengwen
  * @date 2020-12-29
+ * 敏感词拦截器
  */
 @Component
-public class SensitiveArgumentInterceptor implements HandlerInterceptor {
+public class SensitiveWordCheckInterceptor implements HandlerInterceptor {
 
-    private static final Logger logger = LoggerFactory.getLogger(SensitiveArgumentInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SensitiveWordCheckInterceptor.class);
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -36,12 +36,9 @@ public class SensitiveArgumentInterceptor implements HandlerInterceptor {
             for (MethodParameter parameter : params) {
                 // 用JSR validated注解的方法需校验
                 if (parameter.hasParameterAnnotation(Validated.class)) {
-                    // 读取前端传过来的参数
-                    Map<String, Object> paramMap = convertToMapFromRequest(request);
                     Field[] fields = parameter.getParameterType().getDeclaredFields();
                     // 按注解处理敏感词
-                    resolveSensitive(paramMap, fields);
-
+                    resolveSensitive(convertToMapFromRequest(request), fields);
                 }
             }
         }
@@ -53,32 +50,43 @@ public class SensitiveArgumentInterceptor implements HandlerInterceptor {
 
     }
 
+    /**
+     * 解析包含Sensitive注解的字段
+     */
     private void resolveSensitive(Map<String, Object> paramMap, Field[] fields) {
         for (Field field : fields) {
             // 按每个字段进行校验
             if (field.getType() != String.class) {
                 continue;
             }
-            Object obj = paramMap.get(field.getName());
-            // TODO 看是否有指定注解
-            if (obj != null) {
-                sensitiveWordValidate(String.valueOf(obj));
+            String value = (String) paramMap.get(field.getName());
+            if (value != null) {
+                Sensitive sensitive = field.getAnnotation(Sensitive.class);
+                if (sensitive != null) {
+                    sensitiveWordValidate(value, sensitive);
+                }
             }
         }
     }
 
-    private void sensitiveWordValidate(String text) {
-        // TODO 具体的敏感词校验规则
-        if (!SensitiveValidator.check(text)) {
-            throw new IllegalArgumentException("对不起，你触发了高风险敏感词");
+    /**
+     * 校验是否包含敏感词
+     */
+    private void sensitiveWordValidate(String text, Sensitive sensitive) {
+        if (!SensitiveWordValidator.ok(text)) {
+            String message = sensitive.message();
+            throw new IllegalArgumentException(String.format(message, text));
         }
     }
 
+    /**
+     * 从request中获取请求体
+     */
     private Map<String, Object> convertToMapFromRequest(HttpServletRequest servletRequest) throws IOException {
         BufferedReader reader = servletRequest.getReader();
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> map = mapper.readValue(reader, Map.class);
-        logger.info("转换为map后: {}", map.toString());
+        logger.info("从request中获取的参数: {}", map.toString());
         return map;
     }
 }

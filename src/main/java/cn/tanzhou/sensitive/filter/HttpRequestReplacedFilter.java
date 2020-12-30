@@ -1,5 +1,6 @@
 package cn.tanzhou.sensitive.filter;
 
+import cn.tanzhou.sensitive.wrapper.HttpRequestWrapper;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -12,12 +13,12 @@ import java.io.IOException;
  * I/O复用
  */
 @Component
-public class SensitiveRequestReplacedFilter implements Filter {
+public class HttpRequestReplacedFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws ServletException {
         try {
-            SafeHttpServletRequestWrapper requestWrapper = new SafeHttpServletRequestWrapper((HttpServletRequest) servletRequest);
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper((HttpServletRequest) servletRequest);
             filterChain.doFilter(requestWrapper, servletResponse);
         } catch (IOException e) {
             e.printStackTrace();

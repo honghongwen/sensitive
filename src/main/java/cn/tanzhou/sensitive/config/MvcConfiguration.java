@@ -1,5 +1,6 @@
 package cn.tanzhou.sensitive.config;
 
+import cn.tanzhou.sensitive.interceptor.SensitiveWordCheckInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -11,13 +12,13 @@ import javax.annotation.Resource;
  * @date 2020-12-29
  */
 @Configuration
-public class ValidatorAutoConfiguration implements WebMvcConfigurer {
+public class MvcConfiguration implements WebMvcConfigurer {
 
     @Resource
-    private SensitiveArgumentInterceptor sensitiveArgumentInterceptor;
+    private SensitiveWordCheckInterceptor sensitiveWordCheckInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(sensitiveArgumentInterceptor);
+        registry.addInterceptor(sensitiveWordCheckInterceptor);
     }
 }
