@@ -1,0 +1,10 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: sensitive-service
+  redis:
+    database: 0
+    host: localhost
+    password: 123456

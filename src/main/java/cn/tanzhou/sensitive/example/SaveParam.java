@@ -2,6 +2,7 @@ package cn.tanzhou.sensitive.example;
 
 import cn.tanzhou.sensitive.annotation.Sensitive;
 
+import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
 
 /**
@@ -16,6 +17,7 @@ public class SaveParam {
     @Sensitive(message = "不能写%s哦")
     private String name;
 
+    @NotEmpty(message = "标题不能为空哦")
     private String title;
 
     private BigDecimal amount;

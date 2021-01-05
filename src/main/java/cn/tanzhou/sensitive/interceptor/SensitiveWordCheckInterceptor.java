@@ -5,6 +5,7 @@ import cn.tanzhou.sensitive.validtor.SensitiveWordValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +26,9 @@ import java.util.Map;
  */
 @Component
 public class SensitiveWordCheckInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private SensitiveWordValidator validator;
 
     private static final Logger logger = LoggerFactory.getLogger(SensitiveWordCheckInterceptor.class);
 
@@ -73,7 +77,7 @@ public class SensitiveWordCheckInterceptor implements HandlerInterceptor {
      * 校验是否包含敏感词
      */
     private void sensitiveWordValidate(String text, Sensitive sensitive) {
-        if (!SensitiveWordValidator.ok(text)) {
+        if (!validator.ok(text)) {
             String message = sensitive.message();
             throw new IllegalArgumentException(String.format(message, text));
         }
